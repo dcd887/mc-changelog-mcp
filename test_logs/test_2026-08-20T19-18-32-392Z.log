@@ -1,0 +1,25 @@
+[03:18:32] MCP test started at 2026-08-20T19:18:32.393Z
+[03:18:32] MCP binary: c:/Users/kjds/Desktop/mc-changelog-mcp/dist/index.js
+[03:18:33] 
+--- 测试 1: 列出可用工具 ---
+[03:18:33] → 发送工具调用 id=1 method=tools/list
+[03:18:33] [OUT] {"result":{"tools":[{"name":"compare_modpacks","description":"比较两个整合包目录的差异，返回新增、删除、更新的模组列表","inputSchema":{"type":"object","properties":{"old_pack_dir":{"type":"string","description":"旧版本整合包根目录路径"},"new_pack_dir":{"type":"string","description":"新版本整合包根目录路径"}},"required":["old_pack_dir","new_pack_dir
+[03:18:35] 
+--- 测试 2: 比较两个整合包 ---
+[03:18:35] → 发送工具调用 id=2 method=tools/call
+[03:18:35] [OUT] {"result":{"content":[{"type":"text","text":"{\n  \"added\": [\n    {\n      \"file\": \"iris-1.7.0.jar\",\n      \"name\": \"iris\"\n    }\n  ],\n  \"removed\": [\n    {\n      \"file\": \"fabric-api-0.92.0.jar\",\n      \"name\": \"fabric-api\"\n    }\n  ],\n  \"updated\": [\n    {\n      \"name\"
+[03:18:37] 
+--- 测试 3: 生成 Changelog ---
+[03:18:37] → 发送工具调用 id=3 method=tools/call
+[03:18:37] [OUT] {"result":{"content":[{"type":"text","text":"# Changelog (v1.0 → v1.1)\n\n## New\n- **iris\" (1.7.0)\n\n## Updated\n- **sodium**: 0.5.8 → 0.6.0\n\n## Removed\n- **fabric-api\" (0.92.0)\n"}]},"jsonrpc":"2.0","id":3}
+[03:18:39] 
+--- 测试 4: 生成文本摘要 ---
+[03:18:39] → 发送工具调用 id=4 method=tools/call
+[03:18:39] [OUT] {"result":{"content":[{"type":"text","text":"=== Changelog ===\nOld: Previous\nNew: Current\n\nNEW (1):\n  + iris                               1.7.0\nUPDATED (1):\n  ~ sodium                             0.5.8 → 0.6.0\nREMOVED (1):\n  - fabric-api                         0.92.0"}]},"jsonrpc":"2.0","
+[03:18:41] 
+--- 测试 5: 保存 Changelog ---
+[03:18:41] → 发送工具调用 id=5 method=tools/call
+[03:18:41] [OUT] {"result":{"content":[{"type":"text","text":"{\n  \"path\": \"C:\\\\Users\\\\kjds\\\\AppData\\\\Local\\\\Temp\\\\mcp-chg-int-1787253515931\\\\changelog.md\",\n  \"bytes\": 21\n}"}]},"jsonrpc":"2.0","id":5}
+[03:18:43] 
+=== 所有测试完成 ===
+[03:18:43] 完整输出已保存到: c:\Users\kjds\Desktop\mc-changelog-mcp\test_logs\test_2026-08-20T19-18-32-392Z.log

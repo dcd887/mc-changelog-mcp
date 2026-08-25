@@ -6,12 +6,44 @@ const path = require("node:path");
 const http = require("node:http");
 const https = require("node:https");
 
+// ── Config（全部可被环境变量覆盖，默认值保证任何环境开箱即用、可移植）───────
+
+/** 从项目根目录的 .env 读取键值到 process.env（仅当未设置时写入，不引入依赖）。 */
+function loadEnvFile(): void {
+  try {
+    const envPath = path.join(__dirname, "..", ".env");
+    if (!fs.existsSync(envPath)) return;
+    for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+      const t = line.trim();
+      if (!t || t.startsWith("#")) continue;
+      const eq = t.indexOf("=");
+      if (eq > 0) {
+        const k = t.slice(0, eq).trim();
+        const v = t.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+        if (k && !(k in process.env)) process.env[k] = v;
+      }
+    }
+  } catch { /* .env 缺失/损坏时忽略，继续用环境变量与默认值 */ }
+}
+loadEnvFile();
+
+const CONFIG = {
+  // Modrinth API 根地址（支持自建网关/代理）
+  modrinthBase: process.env.MODRINTH_API_BASE || "https://api.modrinth.com/v2",
+  // 请求 User-Agent（Modrinth 要求标明来源）
+  userAgent: process.env.CHANGELOG_USER_AGENT || "mc-changelog-mcp/1.0",
+  // 整合包内模组所在的子目录名
+  modsDir: process.env.CHANGELOG_MODS_DIR || "mods",
+  // 增强信息（enrich）时每个模组返回的版本数量上限
+  enrichLimit: parseInt(process.env.CHANGELOG_ENRICH_LIMIT || "5", 10) || 5,
+};
+
 // ── Modrinth API helpers ───────────────────────────────────────────────
 
 function fetchJSON(url: string): Promise<any> {
   return new Promise((resolve, reject) => {
     const client = url.startsWith("https") ? https : http;
-    client.get(url, { headers: { "User-Agent": "mc-changelog-mcp/1.0" } }, (res) => {
+    client.get(url, { headers: { "User-Agent": CONFIG.userAgent } }, (res) => {
       let data = "";
       res.on("data", (chunk) => { data += chunk; });
       res.on("end", () => {
@@ -25,8 +57,9 @@ function fetchJSON(url: string): Promise<any> {
 // ── Pack file scanning ────────────────────────────────────────────────
 
 function scanModsDir(dir) {
-  if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir)
+  const modsDir = path.join(dir, CONFIG.modsDir);
+  if (!fs.existsSync(modsDir)) return [];
+  return fs.readdirSync(modsDir)
     .filter((f) => f.endsWith(".jar") && !f.includes("-sources"))
     .map((f) => {
       const base = f.replace(/\.jar$/, "");
@@ -52,8 +85,8 @@ function getPackMeta(packDir) {
  * Compare two modpack directories and return the diff.
  */
 export function compareModpacks(oldPackDir: string, newPackDir: string): any {
-  const oldMods = scanModsDir(path.join(oldPackDir, "mods"));
-  const newMods = scanModsDir(path.join(newPackDir, "mods"));
+  const oldMods = scanModsDir(oldPackDir);
+  const newMods = scanModsDir(newPackDir);
   const oldNames = new Set(oldMods.map((m) => m.name));
   const newNames = new Set(newMods.map((m) => m.name));
 
@@ -127,17 +160,17 @@ export function generateChangelog(diff, options) {
  * Query Modrinth for version history of a mod to enrich the changelog.
  */
 export async function enrichWithVersionInfo(modName, limit) {
-  const lim = limit || 5;
+  const lim = limit || CONFIG.enrichLimit;
   try {
     const results = await fetchJSON(
-      "https://api.modrinth.com/v2/search?query=" + encodeURIComponent(modName) + "&limit=3&index=relevance"
+      CONFIG.modrinthBase + "/search?query=" + encodeURIComponent(modName) + "&limit=3&index=relevance"
     );
     const hits = results.hits || [];
     const match = hits.find((hit) =>
       hit.slug === modName || modName.includes(hit.slug)
     );
     if (!match) return null;
-    const info = await fetchJSON("https://api.modrinth.com/v2/project/" + match.project_id);
+    const info = await fetchJSON(CONFIG.modrinthBase + "/project/" + match.project_id);
     const versionFiles = info.versions || [];
     const versions = versionFiles.map((v) => ({
       number: v.version_number,

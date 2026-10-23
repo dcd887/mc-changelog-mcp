@@ -8,14 +8,22 @@
     "mc-changelog-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc && copy src\\changelog-templates.json dist\\changelog-templates.json /Y",
+    "build": "tsc && node -e \"require('fs').copyFileSync('src/changelog-templates.json','dist/changelog-templates.json')\"",
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "node test.js",
     "test:unit": "node --test --test-force-exit __tests__/*.test.ts",
     "test:all": "npm run test:unit && npm test"
   },
-  "keywords": ["minecraft", "modpack", "mcp", "model-context-protocol", "changelog", "fabric", "forge"],
+  "keywords": [
+    "minecraft",
+    "modpack",
+    "mcp",
+    "model-context-protocol",
+    "changelog",
+    "fabric",
+    "forge"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

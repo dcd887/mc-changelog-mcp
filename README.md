@@ -1,5 +1,7 @@
 # mc-changelog-mcp
 
+[![M8ven Verified](https://m8ven.ai/badge/mcp/dcd887/mc-changelog-mcp?variant=verified)](https://m8ven.ai/mcp/dcd887/mc-changelog-mcp?s=readme)
+
 MCP server for Minecraft modpack changelog generation and version comparison.
 
 ## Tools

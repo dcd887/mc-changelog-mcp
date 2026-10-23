@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.dcd887/mc-changelog",
+  "description": "查 Minecraft 模组更新日志与版本差异，按版本范围检索",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/dcd887/mc-changelog-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "mc-changelog-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
